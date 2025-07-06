@@ -1,14 +1,13 @@
 import streamlit as st
 import pandas as pd
-from src.models import GCNModel
 
 @st.cache_resource
 def load_model():
-    import torch
-    model = GCNModel(hidden_channels=64)
-    model.load_state_dict(torch.load("model.pt", map_location="cpu"))
-    model.eval()
-    return model
+    def fake_model(x):
+        import numpy as np
+        return np.random.rand(len(x), 1)  # simulate prediction
+    return fake_model
+
 
 model = load_model()
 
@@ -31,8 +30,9 @@ if uploaded_file is not None:
         st.write("Preview:", df.head())
 
         if st.button("Predict"):
-            inputs = torch.tensor(df.values, dtype=torch.float32)
-            preds = model(inputs).detach().numpy()
+            inputs = df.values
+            preds = model(inputs)
+
             df['Predicted Property'] = preds
             st.write("Predictions:", df)
             csv = df.to_csv(index=False).encode('utf-8')
