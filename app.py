@@ -1,5 +1,5 @@
 import streamlit as st
-from rdkit import Chem
+from rdkit-pypi import Chem
 from src.models import GCNModel
 from src.rdkit_utils import mol_to_graph_data_obj
 import torch
