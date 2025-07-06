@@ -1,6 +1,5 @@
 torch
 torch-geometric
-rdkit-pypi
 streamlit
 scikit-learn
 pandas
