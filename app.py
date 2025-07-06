@@ -1,24 +1,23 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 
 @st.cache_resource
 def load_model():
     def fake_model(x):
-        import numpy as np
         return np.random.rand(len(x), 1)  # simulate prediction
     return fake_model
 
-
 model = load_model()
 
-st.title("Molecular Property Predictor")
+st.title("Molecular Property Predictor (Mock Version)")
 
 st.markdown("""
 Upload a CSV file with molecular features. 
 Example format:
 ```
-feature1,feature2,feature3,...
-0.12,0.34,0.56,...
+feature1,feature2,feature3
+0.12,0.34,0.56
 ```
 """)
 
@@ -32,7 +31,6 @@ if uploaded_file is not None:
         if st.button("Predict"):
             inputs = df.values
             preds = model(inputs)
-
             df['Predicted Property'] = preds
             st.write("Predictions:", df)
             csv = df.to_csv(index=False).encode('utf-8')
