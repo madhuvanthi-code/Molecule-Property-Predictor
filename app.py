@@ -1,6 +1,8 @@
 import streamlit as st
-import torch
+from rdkit import Chem
 from src.models import GCNModel
+from src.rdkit_utils import mol_to_graph_data_obj
+import torch
 
 @st.cache_resource
 def load_model():
@@ -9,15 +11,18 @@ def load_model():
     model.eval()
     return model
 
-@st.cache_resource
-def load_example_data():
-    return torch.load("example_graph.pt", map_location="cpu")
-
 model = load_model()
-data = load_example_data()
-data.batch = torch.zeros(data.num_nodes, dtype=torch.long)
 
-st.title("Molecular Property Predictor (Demo)")
-if st.button("Predict Example Molecule"):
-    pred = model(data)
-    st.success(f"Predicted Property: {pred.item():.4f}")
+st.title("Molecular Property Predictor (QM9)")
+
+smiles = st.text_input("Enter a SMILES string:", value="CCO")
+
+if smiles:
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        st.error("Invalid SMILES string.")
+    else:
+        data = mol_to_graph_data_obj(mol)
+        data.batch = torch.zeros(data.num_nodes, dtype=torch.long)
+        pred = model(data)
+        st.success(f"Predicted Property: {pred.item():.4f}")
