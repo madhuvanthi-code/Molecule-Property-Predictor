@@ -1,5 +1,6 @@
 import streamlit as st
 import torch
+import pandas as pd
 from src.models import GCNModel
 
 @st.cache_resource
@@ -9,16 +10,32 @@ def load_model():
     model.eval()
     return model
 
-@st.cache_resource
-def load_example_data():
-    return torch.load("example_graph.pt", map_location="cpu")
-
 model = load_model()
-data = load_example_data()
-data.batch = torch.zeros(data.num_nodes, dtype=torch.long)
 
-st.title("Molecular Property Predictor (Demo)")
+st.title("Molecular Property Predictor")
 
-if st.button("Predict Example Molecule"):
-    pred = model(data)
-    st.success(f"Predicted Property: {pred.item():.4f}")
+st.markdown("""
+Upload a CSV file with molecular features. 
+Example format:
+```
+feature1,feature2,feature3,...
+0.12,0.34,0.56,...
+```
+""")
+
+uploaded_file = st.file_uploader("Upload CSV file", type="csv")
+
+if uploaded_file is not None:
+    try:
+        df = pd.read_csv(uploaded_file)
+        st.write("Preview:", df.head())
+
+        if st.button("Predict"):
+            inputs = torch.tensor(df.values, dtype=torch.float32)
+            preds = model(inputs).detach().numpy()
+            df['Predicted Property'] = preds
+            st.write("Predictions:", df)
+            csv = df.to_csv(index=False).encode('utf-8')
+            st.download_button("Download Predictions", csv, "predictions.csv", "text/csv")
+    except Exception as e:
+        st.error(f"Error processing file: {e}")
