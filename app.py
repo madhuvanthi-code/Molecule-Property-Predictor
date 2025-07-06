@@ -1,10 +1,10 @@
 import streamlit as st
-import torch
 import pandas as pd
 from src.models import GCNModel
 
 @st.cache_resource
 def load_model():
+    import torch
     model = GCNModel(hidden_channels=64)
     model.load_state_dict(torch.load("model.pt", map_location="cpu"))
     model.eval()
